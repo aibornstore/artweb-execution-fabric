@@ -67,3 +67,14 @@ func TestSTARTShadowRejectsDanglingCrossNamespaceAndUntrustedExecution(t *testin
 		})
 	}
 }
+
+func TestSTARTShadowReceiptIsDeterministicAndScoped(t *testing.T) {
+	env:=startTestEnvelope(t)
+	a,err:=ReadbackSTARTShadow(env)
+	if err!=nil {t.Fatal(err)}
+	b,err:=ReadbackSTARTShadow(cloneStart(t,env))
+	if err!=nil {t.Fatal(err)}
+	if a!=b || a.ExternalExecution || a.Status!="STRUCTURAL_VALIDATION_ONLY" || a.RelationCount==0 {
+		t.Fatalf("unexpected START guard receipt: %+v %+v",a,b)
+	}
+}
