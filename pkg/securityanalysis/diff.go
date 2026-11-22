@@ -40,7 +40,7 @@ func Compare(previous,current Report)(Delta,error){
     return d,nil
 }
 func validateReport(r Report)error{
-    if r.Schema!=Schema || (r.Tool!="nmap" && r.Tool!="zap"){return errors.New("unsupported report schema or tool")}
+    if r.Schema!=Schema || (r.Tool!="nmap" && r.Tool!="zap" && r.Tool!="tshark"){return errors.New("unsupported report schema or tool")}
     if len(r.SourceSHA256)!=64{return errors.New("missing source SHA-256")}
     if _,err:=hex.DecodeString(r.SourceSHA256);err!=nil{return errors.New("invalid source SHA-256")}
     if len(r.Findings)>MaxFindings{return errors.New("too many findings")}

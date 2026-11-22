@@ -50,6 +50,7 @@ func Parse(tool string, raw []byte) (Report,error) {
     switch tool {
     case "nmap": found,err=parseNmap(raw)
     case "zap": found,err=parseZAP(raw)
+    case "tshark": found,err=parseTShark(raw)
     default: return Report{},fmt.Errorf("unsupported analyzer %q",tool)
     }
     if err!=nil { return Report{},err }
