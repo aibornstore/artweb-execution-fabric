@@ -13,6 +13,13 @@ import (
 )
 
 func main() {
+    if len(os.Args)==6 && os.Args[1]=="stage" {
+        if err:=runStage(os.Args[2],os.Args[3],os.Args[4],os.Args[5]);err!=nil {
+            fmt.Fprintln(os.Stderr,err)
+            os.Exit(1)
+        }
+        return
+    }
     if len(os.Args)==4 && os.Args[1]=="graph" {
         if err:=runGraph(os.Args[2],os.Args[3]);err!=nil {
             fmt.Fprintln(os.Stderr,err)
@@ -28,7 +35,7 @@ func main() {
         return
     }
     if len(os.Args)!=4 {
-        fmt.Fprintln(os.Stderr,"usage: analysis-ingest <nmap|zap|tshark> <source.xml|source.json> <output.json>\n       analysis-ingest diff <previous-report.json> <current-report.json> <delta.json>\n       analysis-ingest graph <report.json> <u8pi-projection.json>")
+        fmt.Fprintln(os.Stderr,"usage: analysis-ingest <nmap|zap|tshark> <source.xml|source.json> <output.json>\n       analysis-ingest diff <previous-report.json> <current-report.json> <delta.json>\n       analysis-ingest graph <report.json> <u8pi-projection.json>\n       analysis-ingest stage <report.json> <project-id> <namespace> <start-envelope.json>")
         os.Exit(2)
     }
     if err:=run(os.Args[1],os.Args[2],os.Args[3]);err!=nil {

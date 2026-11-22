@@ -73,3 +73,27 @@ is an exchange format for a future confirmed sink, not a parallel database.
 Next gate: locate the authoritative REAF graph sink plus its schema and
 allowed write method; validate input mapping, then enable a SHADOW-only sink
 with explicit rollback. No writes or runtime promotion were performed here.
+
+## START/REAF staging adapter — P2.1
+
+A canonical staging input contract was found in Library archive
+`/ArtWeb/START/HANDOFFS/START_REAF_INTEGRATION_001_20261019.zip`.
+Its original `TOOLS/reaf_prepare.py` requires `project_id`, `namespace`,
+`purpose`, nonempty unique `sources`, `authority.execute_external`,
+and a provenance-linked `primitives` array containing P1–P8.
+
+`analysis-ingest stage <report.json> <project-id> <namespace> <envelope.json>`
+creates `START_REAF_INPUT_V0.1`-compatible JSON, retaining source SHA-256
+and deterministic, namespace-scoped primitive records. The command always sets
+`execute_external: false`. No REAF binary is loaded.
+
+Validation on the standalone equivalent P2.1 source using the **original**
+`reaf_prepare.py`: `INPUT_VALIDATED_ONLY`, eight primitive types, 21 atoms
+from the TShark demo, `reaf_engine_executed: false`. A deliberately foreign
+namespace was rejected; original Python contract tests passed 3/3.
+Go 1.23.2 targeted unit tests and vet passed locally. Full Go 1.27
+repository suite, current REAF runtime, actual graph persistence: **NOT RUN**.
+
+The REAF 118 synergy ITER021 package is an unrelated candidate training lane,
+not evidence of an authoritative security-analysis graph write API. It was
+inspected read-only, not modified or merged.
