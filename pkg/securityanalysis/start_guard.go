@@ -2,6 +2,7 @@ package securityanalysis
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -92,4 +93,37 @@ func relationFields(value any) (from, to, predicate string, ok bool) {
 	default:
 		return "", "", "", false
 	}
+}
+
+// STARTGuardReceipt is a local structural validation result, not REAF MAIN ACK.
+type STARTGuardReceipt struct {
+	Schema            string `json:"schema"`
+	Status            string `json:"status"`
+	EnvelopeSHA256    string `json:"envelope_sha256"`
+	ProjectID         string `json:"project_id"`
+	Namespace         string `json:"namespace"`
+	Source            string `json:"source"`
+	PrimitiveCount    int    `json:"primitive_count"`
+	RelationCount     int    `json:"relation_count"`
+	ExternalExecution bool   `json:"external_execution"`
+}
+
+func ReadbackSTARTShadow(envelope STARTEnvelope) (STARTGuardReceipt, error) {
+	if err := ValidateSTARTShadow(envelope); err != nil {
+		return STARTGuardReceipt{}, err
+	}
+	raw, err := json.Marshal(envelope)
+	if err != nil {
+		return STARTGuardReceipt{}, err
+	}
+	count := 0
+	for _, atom := range envelope.Primitives {
+		if atom.Type == "P4" {
+			count++
+		}
+	}
+	return STARTGuardReceipt{Schema: "security.analysis-start-guard/v1", Status: "STRUCTURAL_VALIDATION_ONLY",
+		EnvelopeSHA256: sha256Hex(raw), ProjectID: envelope.ProjectID, Namespace: envelope.Namespace,
+		Source: envelope.Sources[0], PrimitiveCount: len(envelope.Primitives), RelationCount: count,
+		ExternalExecution: false}, nil
 }
