@@ -68,5 +68,6 @@ func ProjectSTART(r Report, projectID, namespace string)(STARTEnvelope,error){
         if err:=appendAtom(atom);err!=nil{return STARTEnvelope{},err}
     }
     sort.Slice(out.Primitives,func(i,j int)bool{return out.Primitives[i].ID<out.Primitives[j].ID})
+    if err:=ValidateSTARTShadow(out);err!=nil{return STARTEnvelope{},err}
     return out,nil
 }
