@@ -17,7 +17,14 @@ type Delta struct {
     CurrentSHA256 string `json:"current_source_sha256"`
     Added []Finding `json:"added"`
     NoLongerObserved []Finding `json:"no_longer_observed"`
+    Changed []ObservationChange `json:"changed"`
     Unchanged int `json:"unchanged"`
+}
+// ObservationChange records a semantic change at a stable finding identity.
+type ObservationChange struct {
+    ID string `json:"id"`
+    Before Finding `json:"before"`
+    After Finding `json:"after"`
 }
 const DeltaSchema="security.analysis-delta/v1"
 
@@ -26,17 +33,20 @@ func Compare(previous,current Report)(Delta,error){
     if err:=validateReport(current);err!=nil{return Delta{},fmt.Errorf("current: %w",err)}
     if previous.Tool!=current.Tool{return Delta{},errors.New("cannot compare reports from different tools")}
     d:=Delta{Schema:DeltaSchema,Tool:current.Tool,PreviousSHA256:previous.SourceSHA256,CurrentSHA256:current.SourceSHA256,
-        Added:[]Finding{},NoLongerObserved:[]Finding{}}
+        Added:[]Finding{},NoLongerObserved:[]Finding{},Changed:[]ObservationChange{}}
     prior:=make(map[string]Finding,len(previous.Findings))
     after:=make(map[string]Finding,len(current.Findings))
     for _,f:=range previous.Findings{prior[f.ID]=f}
     for _,f:=range current.Findings{after[f.ID]=f}
     for id,f:=range after{
-        if _,existed:=prior[id];existed{d.Unchanged++}else{d.Added=append(d.Added,f)}
+        if before,existed:=prior[id];existed {
+            if before==f {d.Unchanged++} else {d.Changed=append(d.Changed,ObservationChange{ID:id,Before:before,After:f})}
+        } else {d.Added=append(d.Added,f)}
     }
     for id,f:=range prior{if _,observed:=after[id];!observed{d.NoLongerObserved=append(d.NoLongerObserved,f)}}
     sort.Slice(d.Added,func(i,j int)bool{return d.Added[i].ID<d.Added[j].ID})
     sort.Slice(d.NoLongerObserved,func(i,j int)bool{return d.NoLongerObserved[i].ID<d.NoLongerObserved[j].ID})
+    sort.Slice(d.Changed,func(i,j int)bool{return d.Changed[i].ID<d.Changed[j].ID})
     return d,nil
 }
 func validateReport(r Report)error{

@@ -97,3 +97,13 @@ repository suite, current REAF runtime, actual graph persistence: **NOT RUN**.
 The REAF 118 synergy ITER021 package is an unrelated candidate training lane,
 not evidence of an authoritative security-analysis graph write API. It was
 inspected read-only, not modified or merged.
+
+## P2.2 delta correctness
+
+A stable ID identifies the same target/rule/service, but an individual observation
+may change (service version in Nmap, risk level in ZAP, packet count in TShark).
+`Compare` now emits `changed: [{id,before,after}]` instead of silently
+counting these cases as `unchanged`. Changes in scanner evidence do not prove
+a vulnerability appeared or was remediated. Local Go 1.23 regression covers
+all three cases. The schema remains `security.analysis-delta/v1` with additive
+`changed` field. Existing P1 comparisons remain compatible.
