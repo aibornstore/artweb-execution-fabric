@@ -1,0 +1,32 @@
+# OFFLINE TEMPLATE ONLY. Adapt the context URL and HAR filename to your
+# authorized recording before executing. This plan does not spider, replay
+# HTTP requests or perform an active scan.
+env:
+  contexts:
+    - name: recorded-test-app
+      urls:
+        - https://app.example.test
+  parameters:
+    failOnError: true
+    failOnWarning: false
+jobs:
+  - type: passiveScan-config
+    parameters:
+      scanOnlyInScope: true
+      maxAlertsPerRule: 50
+      maxBodySizeInBytesToScan: 262144
+  - type: import
+    parameters:
+      type: har
+      fileName: ./recordings/previous-session.har
+      sendRequests: false
+      maxMessages: 5000
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: ./reports
+      reportFile: recorded-passive.json
+      displayReport: false
